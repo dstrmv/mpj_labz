@@ -27,5 +27,9 @@ public class Shift {
 
         cart.Sendrecv(a, 0, 1, MPI.INT, shift.rank_dest, 0, b, 0, 1, MPI.INT, shift.rank_source, 0);
         System.out.printf("rank = %d b = %d\n", rank, b[0]);
+
+        cart.Free();
+        MPI.Finalize();
+
     }
 }
