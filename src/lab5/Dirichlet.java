@@ -28,10 +28,13 @@ public class Dirichlet {
                     b[i - 1][j - 1] = a[i][j];
                 }
             }
+
             printMatrix(a, 0);
-           // printMatrix(b, 0);
+            // printMatrix(b, 0);
             System.out.println();
         }
+
+        MPI.COMM_WORLD.Bcast(a, 0, n, MPI.OBJECT, 0);
 
         if (rank == 0) {
             left = MPI.PROC_NULL;
@@ -51,16 +54,18 @@ public class Dirichlet {
         if (rank != size - 1)
             req[1] = MPI.COMM_WORLD.Send_init(b[m - 1], 0, n, MPI.DOUBLE, right, 5);
         if (rank != 0)
-            req[2] = MPI.COMM_WORLD.Recv_init(a[0], 1, n, MPI.DOUBLE, left, 5);
+            req[2] = MPI.COMM_WORLD.Recv_init(a[m], 1, n, MPI.DOUBLE, left, 5);
         if (rank != size - 1)
-            req[3] = MPI.COMM_WORLD.Recv_init(a[m + 1], 1, n, MPI.DOUBLE, right, 5);
+            req[3] = MPI.COMM_WORLD.Recv_init(a[1], 1, n, MPI.DOUBLE, right, 5);
 
         for (int c = 0; c < 100; c++) {
 
-            for (int i = 1; i <= n; i++) {
-                b[0][i - 1] = 0.25 * (a[0][i] + a[2][i] + a[1][i + 1] + a[1][i - 1]);
-                b[m - 1][i - 1] = 0.25 * (a[m][i - 1] + a[m][i + 1] + a[m - 1][i] + a[m + 1][i]);
-            }
+        for (int i = 1; i <= n; i++) {
+            b[0][i - 1] = 0.25 * (a[0][i] + a[2][i] + a[1][i + 1] + a[1][i - 1]);
+            b[m - 1][i - 1] = 0.25 * (a[m][i - 1] + a[m][i + 1] + a[m - 1][i] + a[m + 1][i]);
+        }
+
+
 
             Prequest.Startall(req);
 
@@ -75,6 +80,8 @@ public class Dirichlet {
             }
 
             Prequest.Waitall(req);
+            if (rank == 0)
+                printMatrix(a, c);
         }
 
         if (rank == 0) {
