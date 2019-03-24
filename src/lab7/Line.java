@@ -1,4 +1,4 @@
-package lb7;
+package lab7;
 
 import mpi.*;
 
