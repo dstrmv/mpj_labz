@@ -10,12 +10,13 @@ import java.util.Random;
 public class Matrix {
     public static void main(String[] args) {
 
-        int n = 4;
-        int m = 4;
+        int n = 200;
+        int m = 200;
 
         double[] a = new double[n * m];
         double[] b = new double[m * n];
         double[] c = new double[n * n];
+        double[] cr = new double[n * n];
 
         int rank, size;
 
@@ -51,14 +52,17 @@ public class Matrix {
 //            b[7] = 16;
         }
 
-        int o = n / size;
+        int part = (n / size) * m;
+        double[] ai = new double[part];
 
-        //MPI.COMM_WORLD.Scatter(a, );
-
-        MPI.COMM_WORLD.Bcast(a, 0, a.length, MPI.DOUBLE, 0);
+        MPI.COMM_WORLD.Scatter(a, 0, part, MPI.DOUBLE, ai, 0, part, MPI.DOUBLE, 0);
+        System.arraycopy(ai, 0, a, part * rank, ai.length);
         MPI.COMM_WORLD.Bcast(b, 0, b.length, MPI.DOUBLE, 0);
 
-        for (int i = rank; i < n; i += size) {
+        int start = rank * n / size;
+        int end = (rank + 1) * n / size;
+
+        for (int i = start; i < end; i++) {
             for (int j = 0; j < n; j++) {
                 for (int k = 0; k < m; k++) {
                     c[n * i + j] += a[i * m + k] * b[k * n + j];
@@ -66,13 +70,19 @@ public class Matrix {
             }
         }
 
+        MPI.COMM_WORLD.Barrier();
+
+        MPI.COMM_WORLD.Gather(c, rank*n, n*n/size, MPI.DOUBLE, cr, 0, n*n/size, MPI.DOUBLE, 0);
+
+        MPI.COMM_WORLD.Barrier();
+
         if (rank == 0) {
 
             System.out.println(Arrays.toString(a));
             System.out.println();
             System.out.println(Arrays.toString(b));
             System.out.println();
-            System.out.println(Arrays.toString(c));
+            System.out.println(Arrays.toString(cr));
             System.out.println();
         }
 
