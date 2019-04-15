@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class Matrix {
+
     public static void main(String[] args) {
 
         int n = 4;
@@ -26,30 +27,30 @@ public class Matrix {
         size = MPI.COMM_WORLD.Size();
 
         if (rank == 0) {
+
+            Random r = new Random();
+            for (int i = 0; i < a.length; i++) {
+                a[i] = r.nextInt(9) + 1;
+                b[i] = r.nextInt(10) + 10;
+            }
+
+//            a[0] = 1;
+//            a[1] = 2;
+//            a[2] = 3;
+//            a[3] = 4;
+//            a[4] = 5;
+//            a[5] = 6;
+//            a[6] = 7;
+//            a[7] = 8;
 //
-//            Random r = new Random();
-//            for (int i = 0; i < a.length; i++) {
-//                a[i] = r.nextInt(9) + 1;
-//                b[i] = r.nextInt(10) + 10;
-//            }
-
-            a[0] = 1;
-            a[1] = 2;
-            a[2] = 3;
-            a[3] = 4;
-            a[4] = 5;
-            a[5] = 6;
-            a[6] = 7;
-            a[7] = 8;
-
-            b[0] = 9;
-            b[1] = 10;
-            b[2] = 11;
-            b[3] = 12;
-            b[4] = 13;
-            b[5] = 14;
-            b[6] = 15;
-            b[7] = 16;
+//            b[0] = 9;
+//            b[1] = 10;
+//            b[2] = 11;
+//            b[3] = 12;
+//            b[4] = 13;
+//            b[5] = 14;
+//            b[6] = 15;
+//            b[7] = 16;
         }
 
         int part = (n / size) * m;
@@ -73,7 +74,7 @@ public class Matrix {
 
         MPI.COMM_WORLD.Barrier();
 
-        MPI.COMM_WORLD.Gather(c, rank * n * n/size, n * n / size, MPI.DOUBLE, cr, 0, n * n / size, MPI.DOUBLE, 0);
+        MPI.COMM_WORLD.Gather(c, rank * n * n / size, n * n / size, MPI.DOUBLE, cr, 0, n * n / size, MPI.DOUBLE, 0);
 
         MPI.COMM_WORLD.Barrier();
 

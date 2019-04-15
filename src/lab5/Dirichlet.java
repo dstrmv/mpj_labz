@@ -24,9 +24,7 @@ public class Dirichlet {
         if (rank == 0) {
             generateRandomMatrix(a);
             for (int i = 1; i < m + 1; i++) {
-                for (int j = 1; j < n + 1; j++) {
-                    b[i - 1][j - 1] = a[i][j];
-                }
+                System.arraycopy(a[i], 1, b[i - 1], 0, n);
             }
 
             printMatrix(a, 0);
@@ -48,7 +46,6 @@ public class Dirichlet {
             right = rank + 1;
         }
 
-
         if (rank != 0)
             req[0] = MPI.COMM_WORLD.Send_init(b[0], 0, n, MPI.DOUBLE, left, 5);
         if (rank != size - 1)
@@ -65,13 +62,11 @@ public class Dirichlet {
             b[m - 1][i - 1] = 0.25 * (a[m][i - 1] + a[m][i + 1] + a[m - 1][i] + a[m + 1][i]);
         }
 
-
-
             Prequest.Startall(req);
 
-            for (int j = 2; j <= m - 1; j++) {
+            for (int j = 1; j <= m; j++) {
                 for (int i = 1; i <= n; i++) {
-                    b[j - 1][i - 1] = 0.25 * (a[j][i - 1] + a[j][i + 1] + a[i][j - 1] + a[i][j + 1]);
+                    b[j - 1][i - 1] = 0.25 * (a[j][i - 1] + a[j][i + 1] + a[j-1][i] + a[j+1][i]);
                 }
             }
 
