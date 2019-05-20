@@ -43,6 +43,5 @@ public class Ring {
         cart.Free();
         MPI.Finalize();
 
-
     }
 }
