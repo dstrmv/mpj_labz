@@ -10,11 +10,12 @@ public class Matrix {
 
         int n = 4;
         int m = 2;
+        int k = 5;
 
         double[] a = new double[n * m];
-        double[] b = new double[m * n];
-        double[] c = new double[n * n];
-        double[] cr = new double[n * n];
+        double[] b = new double[m * k];
+        double[] c = new double[n * k];
+        double[] cr = new double[n * k];
 
         int rank, size;
 
@@ -50,6 +51,8 @@ public class Matrix {
             b[5] = 14;
             b[6] = 15;
             b[7] = 16;
+            b[8] = 17;
+            b[9] = 18;
         }
 
         int part = (n / size) * m;
@@ -64,31 +67,41 @@ public class Matrix {
         int end = (rank + 1) * n / size;
 
         for (int i = start; i < end; i++) {
-            for (int j = 0; j < n; j++) {
-                for (int k = 0; k < m; k++) {
-                    c[n * i + j] += a[i * m + k] * b[k * n + j];
+            for (int j = 0; j < k; j++) {
+                for (int l = 0; l < m; l++) {
+                    c[k * i + j] += a[i * m + l] * b[l * k + j];
                 }
             }
         }
 
         MPI.COMM_WORLD.Barrier();
 
-        MPI.COMM_WORLD.Gather(c, rank * n * n/size, n * n / size, MPI.DOUBLE, cr, 0, n * n / size, MPI.DOUBLE, 0);
+        MPI.COMM_WORLD.Gather(c, rank * n * k / size, n * k / size, MPI.DOUBLE, cr, 0, n * k / size, MPI.DOUBLE, 0);
 
         MPI.COMM_WORLD.Barrier();
 
         if (rank == 0) {
 
-            System.out.println(Arrays.toString(a));
-            System.out.println();
-            System.out.println(Arrays.toString(b));
-            System.out.println();
-            System.out.println(Arrays.toString(cr));
+            System.out.println("first matrix:");
+            printMatrix(a, n, m);
+            System.out.println("second matrix:");
+            printMatrix(b, m, k);
+            System.out.println("result matrix:");
+            printMatrix(cr, n, k);
             //System.out.println((System.currentTimeMillis() - startTime) + "ms");
 
         }
 
         MPI.Finalize();
 
+    }
+
+    public static void printMatrix(double[] matrix, int n, int m) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                System.out.printf("%6.0f", matrix[m*i+j]);
+            }
+            System.out.println();
+        }
     }
 }

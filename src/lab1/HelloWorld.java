@@ -16,7 +16,7 @@ public class HelloWorld {
         name = MPI.Get_processor_name(); // pc name
         endwtime = MPI.Wtime();
         System.out.printf("Hello world from process %d of %d at %s as %f second \n",
-                rank, size, name, endwtime-startwtime);
+                rank, size, name, endwtime - startwtime);
         MPI.Finalize(); // finish parallel part of program
     }
 }

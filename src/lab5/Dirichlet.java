@@ -60,11 +60,10 @@ public class Dirichlet {
 
         for (int c = 0; c < 100; c++) {
 
-        for (int i = 1; i <= n; i++) {
-            b[0][i - 1] = 0.25 * (a[0][i] + a[2][i] + a[1][i + 1] + a[1][i - 1]);
-            b[m - 1][i - 1] = 0.25 * (a[m][i - 1] + a[m][i + 1] + a[m - 1][i] + a[m + 1][i]);
-        }
-
+            for (int i = 1; i <= n; i++) {
+                b[0][i - 1] = 0.25 * (a[0][i] + a[2][i] + a[1][i + 1] + a[1][i - 1]);
+                b[m - 1][i - 1] = 0.25 * (a[m][i - 1] + a[m][i + 1] + a[m - 1][i] + a[m + 1][i]);
+            }
 
 
             Prequest.Startall(req);
