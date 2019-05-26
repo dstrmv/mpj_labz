@@ -1,7 +1,6 @@
 package lab5;
 
 import mpi.MPI;
-import mpi.Prequest;
 
 import java.util.Locale;
 import java.util.Random;
@@ -10,105 +9,126 @@ public class Dirichlet {
     public static void main(String[] args) {
         Locale.setDefault(Locale.US);
 
-        int n = 12, m = 12;
+        int n = 8;
+        int m = 5;
 
-        double[][] a = new double[m + 2][n + 2];
-        double[][] b = new double[m][n];
+        double[][] a = new double[n][m];
+        double[][] b = new double[n][m];
+
 
         MPI.Init(args);
-        Prequest[] req = new Prequest[4];
+
         int rank = MPI.COMM_WORLD.Rank();
         int size = MPI.COMM_WORLD.Size();
-        int left, right;
+        int strNum = n / size;
 
         if (rank == 0) {
-            generateRandomMatrix(a);
-            for (int i = 1; i < m + 1; i++) {
-                for (int j = 1; j < n + 1; j++) {
-                    b[i - 1][j - 1] = a[i][j];
+            //generateRandomMatrix(a);
+
+            a[0][0] = 1.0;
+            a[0][1] = 2.0;
+            a[0][2] = 3.0;
+            a[0][3] = 4.0;
+            a[0][4] = 5.0;
+
+            a[1][0] = 10.0;
+            a[1][1] = 9.0;
+            a[1][2] = 8.0;
+            a[1][3] = 7.0;
+            a[1][4] = 6.0;
+
+            a[2][0] = 11.0;
+            a[2][1] = 12.0;
+            a[2][2] = 13.0;
+            a[2][3] = 14.0;
+            a[2][4] = 15.0;
+
+            a[3][0] = 20.0;
+            a[3][1] = 19.0;
+            a[3][2] = 18.0;
+            a[3][3] = 17.0;
+            a[3][4] = 16.0;
+
+            a[4][0] = 21.0;
+            a[4][1] = 22.0;
+            a[4][2] = 23.0;
+            a[4][3] = 24.0;
+            a[4][4] = 25.0;
+
+            a[5][0] = 30.0;
+            a[5][1] = 29.0;
+            a[5][2] = 28.0;
+            a[5][3] = 27.0;
+            a[5][4] = 26.0;
+
+            a[6][0] = 31.0;
+            a[6][1] = 32.0;
+            a[6][2] = 33.0;
+            a[6][3] = 34.0;
+            a[6][4] = 35.0;
+
+            a[7][0] = 40.0;
+            a[7][1] = 39.0;
+            a[7][2] = 38.0;
+            a[7][3] = 37.0;
+            a[7][4] = 36.0;
+
+        }
+
+        MPI.COMM_WORLD.Bcast(a, 0, a.length, MPI.OBJECT, 0);
+
+        for (int i = rank * strNum; i < (rank + 1) * strNum; i++) {
+            System.arraycopy(a[i], 0, b[i], 0, a[i].length);
+        }
+
+        if (rank == 0) {
+
+            for (int i = 1; i < strNum; i++) {
+                for (int j = 1; j < m - 1; j++) {
+                    b[i][j] = (a[i - 1][j] + a[i + 1][j] + a[i][j - 1] + a[i][j + 1]) * 0.25;
                 }
             }
 
-            printMatrix(a, 0);
-            // printMatrix(b, 0);
-            System.out.println();
-        }
-
-        MPI.COMM_WORLD.Bcast(a, 0, n, MPI.OBJECT, 0);
-
-        if (rank == 0) {
-            left = MPI.PROC_NULL;
-        } else {
-            left = rank - 1;
-        }
-
-        if (rank == size - 1) {
-            right = MPI.PROC_NULL;
-        } else {
-            right = rank + 1;
-        }
 
 
-        if (rank != 0)
-            req[0] = MPI.COMM_WORLD.Send_init(b[0], 0, n, MPI.DOUBLE, left, 5);
-        if (rank != size - 1)
-            req[1] = MPI.COMM_WORLD.Send_init(b[m - 1], 0, n, MPI.DOUBLE, right, 5);
-        if (rank != 0)
-            req[2] = MPI.COMM_WORLD.Recv_init(a[m], 1, n, MPI.DOUBLE, left, 5);
-        if (rank != size - 1)
-            req[3] = MPI.COMM_WORLD.Recv_init(a[1], 1, n, MPI.DOUBLE, right, 5);
+        } else if (rank == size - 1) {
 
-        for (int c = 0; c < 100; c++) {
-
-            for (int i = 1; i <= n; i++) {
-                b[0][i - 1] = 0.25 * (a[0][i] + a[2][i] + a[1][i + 1] + a[1][i - 1]);
-                b[m - 1][i - 1] = 0.25 * (a[m][i - 1] + a[m][i + 1] + a[m - 1][i] + a[m + 1][i]);
-            }
-
-
-            Prequest.Startall(req);
-
-            for (int j = 2; j <= m - 1; j++) {
-                for (int i = 1; i <= n; i++) {
-                    b[j - 1][i - 1] = 0.25 * (a[j][i - 1] + a[j][i + 1] + a[i][j - 1] + a[i][j + 1]);
+            for (int i = rank * strNum; i < (rank + 1) * strNum - 1; i++) {
+                for (int j = 1; j < m - 1; j++) {
+                    b[i][j] = (a[i - 1][j] + a[i + 1][j] + a[i][j - 1] + a[i][j + 1]) * 0.25;
                 }
             }
 
-            for (int j = 1; j <= m; j++) {
-                System.arraycopy(b[j - 1], 0, a[j], 1, n);
-            }
+        } else {
 
-            Prequest.Waitall(req);
-            if (rank == 0)
-                printMatrix(a, c);
         }
 
-        if (rank == 0) {
-            printMatrix(a, 100);
+
+
+        if (rank == 1) {
+            printMatrix(b);
         }
+
+
         MPI.Finalize();
     }
 
-    static void printMatrix(double[][] array, int c) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("iterarion ").append(c).append("\n");
-        for (int j = 0; j < array.length; j++) {
-            for (int i = 0; i < array[j].length; i++) {
-                sb.append(String.format("%8.3f", array[j][i]));
+    public static void printMatrix(double[][] matrix) {
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                System.out.printf("%6.0f", matrix[i][j]);
             }
-            sb.append("\n");
+            System.out.println();
         }
-        sb.append("----------------------------------------------------------------------------------------------------------------");
-        System.out.println(sb.toString());
     }
+
 
     static void generateRandomMatrix(double[][] array) {
         Random r = new Random();
-        for (int j = 0; j < array.length; j++) {
-            for (int i = 0; i < array[j].length; i++) {
-                array[j][i] = r.nextInt(11);
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array[i].length; j++) {
+                array[i][j] = r.nextInt(11);
             }
-
         }
     }
 

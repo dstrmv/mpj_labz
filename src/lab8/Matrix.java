@@ -2,9 +2,6 @@ package lab8;
 
 import mpi.MPI;
 
-import java.util.Arrays;
-import java.util.Random;
-
 public class Matrix {
     public static void main(String[] args) {
 
@@ -61,7 +58,6 @@ public class Matrix {
         MPI.COMM_WORLD.Scatter(a, 0, part, MPI.DOUBLE, ai, 0, part, MPI.DOUBLE, 0);
         System.arraycopy(ai, 0, a, part * rank, ai.length);
         MPI.COMM_WORLD.Bcast(b, 0, b.length, MPI.DOUBLE, 0);
-
 
         int start = rank * n / size;
         int end = (rank + 1) * n / size;
