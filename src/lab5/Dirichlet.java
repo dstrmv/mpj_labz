@@ -9,8 +9,8 @@ public class Dirichlet {
     public static void main(String[] args) {
         Locale.setDefault(Locale.US);
 
-        int n = 8;
-        int m = 5;
+        int n = 12;
+        int m = 4;
 
         double[][] a = new double[n][m];
         double[][] b = new double[n][m];
